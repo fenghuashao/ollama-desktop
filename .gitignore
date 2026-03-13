@@ -4,3 +4,27 @@ out
 .DS_Store
 .eslintcache
 *.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Editor directories
+.vscode/*
+!.vscode/extensions.json
+!.vscode/launch.json
+!.vscode/settings.json
+.idea
+*.suo
+*.ntvs
+*.njsproj
+*.sln
+*.sw?
+
+# Electron Builder
+release/
+dist-electron/
+
+# OS generated files
+Thumbs.db

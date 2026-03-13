@@ -1,5 +1,7 @@
 # Ollama Desktop Manager
 
+[English](./README.md) | [中文](./README_zh-CN.md)
+
 A powerful, user-friendly desktop management application for Ollama, built with modern web technologies (Electron, React, TypeScript, and Tailwind CSS).
 
 ## ✨ Features
