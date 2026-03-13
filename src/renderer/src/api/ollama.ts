@@ -1,14 +1,14 @@
-import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import semver from 'semver';
-import { 
-  OllamaModel, 
-  SystemStatus, 
-  VersionCompatibility, 
+import axios, { AxiosInstance, AxiosResponse } from 'axios'
+import semver from 'semver'
+import {
+  OllamaModel,
+  SystemStatus,
+  VersionCompatibility,
   CompatibilityLevel,
-  VersionInfo 
-} from '../types';
+  VersionInfo
+} from '../types'
 
-const DEFAULT_HOST = 'http://127.0.0.1:11434';
+const DEFAULT_HOST = 'http://127.0.0.1:11434'
 
 const COMPATIBILITY_CONFIG: VersionCompatibility = {
   minVersion: '0.1.0',
@@ -18,71 +18,72 @@ const COMPATIBILITY_CONFIG: VersionCompatibility = {
     function_calling: { minVersion: '0.2.0' },
     create_model: { minVersion: '0.0.0' }, // Base feature
     pull_model: { minVersion: '0.0.0' },
-    delete_model: { minVersion: '0.0.0' },
+    delete_model: { minVersion: '0.0.0' }
   }
-};
+}
 
 export class OllamaAPI {
-  private client: AxiosInstance;
-  private host: string;
+  private client: AxiosInstance
+  private host: string
 
   constructor(host: string = DEFAULT_HOST) {
-    this.host = host;
+    this.host = host
     this.client = axios.create({
       baseURL: host,
       headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+        'Content-Type': 'application/json'
+      }
+    })
 
     // Add interceptor for better error messages
     this.client.interceptors.response.use(
       (response) => response,
       (error) => {
         if (error.message === 'Network Error') {
-          error.message = '无法连接到 Ollama 服务。请前往“系统状态”页面启动服务，或确保 Ollama 已在后台运行。';
+          error.message =
+            '无法连接到 Ollama 服务。请前往“系统状态”页面启动服务，或确保 Ollama 已在后台运行。'
         }
-        return Promise.reject(error);
+        return Promise.reject(error)
       }
-    );
+    )
   }
 
-  updateHost(host: string) {
-    this.host = host;
-    this.client.defaults.baseURL = host;
+  updateHost(host: string): void {
+    this.host = host
+    this.client.defaults.baseURL = host
   }
 
   async getVersion(): Promise<VersionInfo> {
     try {
-      const response = await this.client.get('/api/version');
-      return response.data;
+      const response = await this.client.get('/api/version')
+      return response.data
     } catch (error) {
-      console.error('Failed to get version:', error);
-      throw error;
+      console.error('Failed to get version:', error)
+      throw error
     }
   }
 
   async checkSystemStatus(): Promise<SystemStatus> {
     try {
-      const versionInfo = await this.getVersion();
-      const version = versionInfo.version;
-      const compatibility = this.checkCompatibility(version);
-      const supportedFeatures = this.getSupportedFeatures(version);
+      const versionInfo = await this.getVersion()
+      const version = versionInfo.version
+      const compatibility = this.checkCompatibility(version)
+      const supportedFeatures = this.getSupportedFeatures(version)
 
-      // Note: Ollama doesn't provide CPU/Memory usage via API yet. 
+      // Note: Ollama doesn't provide CPU/Memory usage via API yet.
       // This would require a separate system monitor or a different API if added.
       // For now we mock resource usage or leave it as placeholder.
-      
+
       return {
         isRunning: true,
         version,
         memoryUsage: 0, // Placeholder
-        cpuUsage: 0,    // Placeholder
+        cpuUsage: 0, // Placeholder
         lastChecked: Date.now(),
         compatibility,
         supportedFeatures
-      };
-    } catch (error) {
+      }
+    } catch {
       return {
         isRunning: false,
         version: 'unknown',
@@ -91,67 +92,69 @@ export class OllamaAPI {
         lastChecked: Date.now(),
         compatibility: 'incompatible',
         supportedFeatures: []
-      };
+      }
     }
   }
 
   checkCompatibility(version: string): CompatibilityLevel {
     if (!semver.valid(version)) {
       // Handle non-semver versions (e.g. dev builds) carefully, assume compatible or outdated
-      return 'outdated';
+      return 'outdated'
     }
 
     if (semver.lt(version, COMPATIBILITY_CONFIG.minVersion)) {
-      return 'incompatible';
+      return 'incompatible'
     }
 
     // Check if version is significantly old (arbitrary logic, e.g., < 0.1.20)
     if (semver.lt(version, '0.1.20')) {
-      return 'outdated';
+      return 'outdated'
     }
 
-    return 'compatible';
+    return 'compatible'
   }
 
   getSupportedFeatures(version: string): string[] {
-    if (!semver.valid(version)) return [];
-    
-    return Object.keys(COMPATIBILITY_CONFIG.supportedFeatures).filter(feature => {
-      const config = COMPATIBILITY_CONFIG.supportedFeatures[feature];
-      return semver.gte(version, config.minVersion);
-    });
+    if (!semver.valid(version)) return []
+
+    return Object.keys(COMPATIBILITY_CONFIG.supportedFeatures).filter((feature) => {
+      const config = COMPATIBILITY_CONFIG.supportedFeatures[feature]
+      return semver.gte(version, config.minVersion)
+    })
   }
 
   async getModels(): Promise<OllamaModel[]> {
-    const response = await this.client.get('/api/tags');
-    return response.data.models;
+    const response = await this.client.get('/api/tags')
+    return response.data.models
   }
 
   async pullModel(name: string, stream: boolean = false): Promise<AxiosResponse> {
-    return this.client.post('/api/pull', { name, stream });
+    return this.client.post('/api/pull', { name, stream })
   }
 
   async deleteModel(name: string): Promise<AxiosResponse> {
-    return this.client.delete('/api/delete', { data: { name } });
+    return this.client.delete('/api/delete', { data: { name } })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async showModel(name: string): Promise<any> {
-    const response = await this.client.post('/api/show', { name });
-    return response.data;
+    const response = await this.client.post('/api/show', { name })
+    return response.data
   }
 
   async copyModel(source: string, destination: string): Promise<AxiosResponse> {
-    return this.client.post('/api/copy', { source, destination });
+    return this.client.post('/api/copy', { source, destination })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async listRunningModels(): Promise<any> {
     try {
-      const response = await this.client.get('/api/ps');
-      return response.data;
+      const response = await this.client.get('/api/ps')
+      return response.data
     } catch (error) {
       // Fallback for older Ollama versions that don't support /api/ps
-      console.warn('Failed to list running models:', error);
-      return { models: [] };
+      console.warn('Failed to list running models:', error)
+      return { models: [] }
     }
   }
 
@@ -164,9 +167,9 @@ export class OllamaAPI {
         model,
         messages: [],
         keep_alive: 0
-      });
+      })
     } catch (error) {
-      console.error('Failed to stop model:', error);
+      console.error('Failed to stop model:', error)
     }
   }
 
@@ -175,26 +178,28 @@ export class OllamaAPI {
     try {
       await this.client.post('/api/chat', {
         model,
-        messages: [],
+        messages: []
         // Just loading it
-      });
+      })
     } catch (error) {
-      console.error('Failed to start model:', error);
+      console.error('Failed to start model:', error)
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async chat(model: string, messages: any[], stream: boolean = false): Promise<AxiosResponse> {
     return this.client.post('/api/chat', {
       model,
       messages,
       stream
-    });
+    })
   }
 
   // Helper for streaming response
   async streamChat(
-    model: string, 
-    messages: any[], 
+    model: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    messages: any[],
     onChunk: (content: string) => void
   ): Promise<void> {
     try {
@@ -202,40 +207,40 @@ export class OllamaAPI {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ model, messages, stream: true })
-      });
+      })
 
-      if (!response.body) throw new Error('No response body');
+      if (!response.body) throw new Error('No response body')
 
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
 
       while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        
-        const chunk = decoder.decode(value, { stream: true });
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
         // Ollama sends multiple JSON objects in one chunk sometimes
-        const lines = chunk.split('\n').filter(line => line.trim() !== '');
-        
+        const lines = chunk.split('\n').filter((line) => line.trim() !== '')
+
         for (const line of lines) {
           try {
-            const json = JSON.parse(line);
+            const json = JSON.parse(line)
             if (json.message && json.message.content) {
-              onChunk(json.message.content);
+              onChunk(json.message.content)
             }
             if (json.done) {
-              return;
+              return
             }
-          } catch (e) {
-            console.warn('Failed to parse chunk:', line);
+          } catch {
+            console.warn('Failed to parse chunk:', line)
           }
         }
       }
     } catch (error) {
-      console.error('Streaming error:', error);
-      throw error;
+      console.error('Streaming error:', error)
+      throw error
     }
   }
 }
 
-export const ollamaAPI = new OllamaAPI();
+export const ollamaAPI = new OllamaAPI()

@@ -1,6 +1,6 @@
-import i18n from 'i18next';
-import { initReactI18next } from 'react-i18next';
-import LanguageDetector from 'i18next-browser-languagedetector';
+import i18n from 'i18next'
+import { initReactI18next } from 'react-i18next'
+import LanguageDetector from 'i18next-browser-languagedetector'
 
 // Translation resources
 const resources = {
@@ -82,11 +82,13 @@ const resources = {
         title: 'Settings',
         connection: 'Connection',
         hostLabel: 'Ollama API Host',
-        hostHint: 'Default is http://localhost:11434. Change this if your Ollama instance is running elsewhere.',
+        hostHint:
+          'Default is http://localhost:11434. Change this if your Ollama instance is running elsewhere.',
         proxyMode: 'Proxy Mode',
         proxyDirect: 'Direct Connection (Bypass System Proxy)',
         proxySystem: 'Use System Proxy',
-        proxyHint: 'Select "Direct Connection" if you have issues connecting to localhost while using a VPN or Proxy.',
+        proxyHint:
+          'Select "Direct Connection" if you have issues connecting to localhost while using a VPN or Proxy.',
         appearance: 'Appearance',
         theme: 'Theme',
         themeSystem: 'System',
@@ -206,7 +208,7 @@ const resources = {
       }
     }
   }
-};
+}
 
 i18n
   .use(LanguageDetector)
@@ -218,6 +220,6 @@ i18n
     interpolation: {
       escapeValue: false // React already safes from xss
     }
-  });
+  })
 
-export default i18n;
+export default i18n

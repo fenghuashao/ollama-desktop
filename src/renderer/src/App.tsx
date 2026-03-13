@@ -1,11 +1,12 @@
-import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Layout } from './components/Layout';
-import ModelsPage from './pages/ModelsPage';
-import ChatPage from './pages/ChatPage';
-import StatusPage from './pages/StatusPage';
-import SettingsPage from './pages/SettingsPage';
+import React from 'react'
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Layout } from './components/Layout'
+import ModelsPage from './pages/ModelsPage'
+import ChatPage from './pages/ChatPage'
+import StatusPage from './pages/StatusPage'
+import SettingsPage from './pages/SettingsPage'
 
-function App() {
+function App(): React.ReactElement {
   return (
     <HashRouter>
       <Routes>
@@ -19,7 +20,7 @@ function App() {
         </Route>
       </Routes>
     </HashRouter>
-  );
+  )
 }
 
-export default App;
+export default App

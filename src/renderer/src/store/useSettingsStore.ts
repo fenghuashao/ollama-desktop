@@ -1,10 +1,10 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import { AppSettings } from '../types';
+import { create } from 'zustand'
+import { persist } from 'zustand/middleware'
+import { AppSettings } from '../types'
 
 interface SettingsState extends AppSettings {
-  updateSettings: (settings: Partial<AppSettings>) => void;
-  resetSettings: () => void;
+  updateSettings: (settings: Partial<AppSettings>) => void
+  resetSettings: () => void
 }
 
 const DEFAULT_SETTINGS: AppSettings = {
@@ -15,38 +15,38 @@ const DEFAULT_SETTINGS: AppSettings = {
   showTimestamp: true,
   compatibilityCheckInterval: 60,
   proxyMode: 'direct'
-};
+}
 
 export const useSettingsStore = create<SettingsState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       ...DEFAULT_SETTINGS,
       updateSettings: (newSettings) => {
         set((state) => {
-          const updated = { ...state, ...newSettings };
+          const updated = { ...state, ...newSettings }
           // If proxy mode changed, notify main process
           if (newSettings.proxyMode && newSettings.proxyMode !== state.proxyMode) {
-            // @ts-ignore
-            window.electron?.ipcRenderer.invoke('set-proxy-mode', newSettings.proxyMode);
+            // @ts-ignore: Electron IPC not typed in window
+            window.electron?.ipcRenderer.invoke('set-proxy-mode', newSettings.proxyMode)
           }
-          return updated;
-        });
+          return updated
+        })
       },
       resetSettings: () => {
-        set(DEFAULT_SETTINGS);
-        // @ts-ignore
-        window.electron?.ipcRenderer.invoke('set-proxy-mode', DEFAULT_SETTINGS.proxyMode);
-      },
+        set(DEFAULT_SETTINGS)
+        // @ts-ignore: Electron IPC not typed in window
+        window.electron?.ipcRenderer.invoke('set-proxy-mode', DEFAULT_SETTINGS.proxyMode)
+      }
     }),
     {
       name: 'app-settings',
       onRehydrateStorage: () => (state) => {
         // Sync proxy settings on app start
         if (state) {
-          // @ts-ignore
-          window.electron?.ipcRenderer.invoke('set-proxy-mode', state.proxyMode);
+          // @ts-ignore: Electron IPC not typed in window
+          window.electron?.ipcRenderer.invoke('set-proxy-mode', state.proxyMode)
         }
       }
     }
   )
-);
+)

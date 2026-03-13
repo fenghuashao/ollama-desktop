@@ -6,8 +6,10 @@ const api = {
   ollama: {
     checkProcess: (): Promise<boolean> => electronAPI.ipcRenderer.invoke('ollama:check-process'),
     getVersion: (): Promise<string> => electronAPI.ipcRenderer.invoke('ollama:get-version'),
-    startService: (): Promise<{ success: boolean; error?: string }> => electronAPI.ipcRenderer.invoke('ollama:start-service'),
-    stopService: (): Promise<{ success: boolean; error?: string }> => electronAPI.ipcRenderer.invoke('ollama:stop-service')
+    startService: (): Promise<{ success: boolean; error?: string }> =>
+      electronAPI.ipcRenderer.invoke('ollama:start-service'),
+    stopService: (): Promise<{ success: boolean; error?: string }> =>
+      electronAPI.ipcRenderer.invoke('ollama:stop-service')
   }
 }
 

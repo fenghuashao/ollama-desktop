@@ -7,12 +7,14 @@ A powerful, user-friendly desktop management application for Ollama, built with 
 ## ✨ Features
 
 ### 🤖 Model Management
+
 - **Easy Pulling**: Search and pull models directly from the Ollama library with progress tracking.
 - **Detailed Inspection**: View model details including Modelfile, Template, Parameters, and License.
 - **Life Cycle Control**: Start, stop, delete, and copy models with ease.
 - **Real-time Status**: Monitor running models and system resource usage.
 
 ### 💬 Intelligent Chat
+
 - **Markdown Support**: Full Markdown rendering with GFM support.
 - **Code Highlighting**: Syntax highlighting for code blocks with one-click copy.
 - **Session Management**: Create multiple chat sessions, switch between them, and manage history.
@@ -20,9 +22,10 @@ A powerful, user-friendly desktop management application for Ollama, built with 
 - **Multilingual UI**: Native support for English and Chinese (Default: Chinese).
 
 ### ⚙️ Comprehensive Settings
+
 - **Connection Control**: Configure custom Ollama API endpoints.
 - **Proxy Management**: Switch between Direct Connection (bypass proxy) and System Proxy modes to resolve VPN/localhost issues.
-- **Appearance Customization**: 
+- **Appearance Customization**:
   - Light/Dark/System theme support.
   - Adjustable font sizes.
 - **System Monitoring**: Configurable compatibility checks and status updates.
@@ -38,6 +41,7 @@ A powerful, user-friendly desktop management application for Ollama, built with 
 ### Installation
 
 1. Clone the repository
+
    ```bash
    git clone <repository-url>
    cd ollama-desktop

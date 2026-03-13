@@ -1,20 +1,21 @@
-import { useSettingsStore } from '../store/useSettingsStore';
-import { RotateCcw } from 'lucide-react';
-import { ollamaAPI } from '../api/ollama';
-import { useTranslation } from 'react-i18next';
+import { useSettingsStore } from '../store/useSettingsStore'
+import { RotateCcw } from 'lucide-react'
+import { ollamaAPI } from '../api/ollama'
+import React from 'react'
+import { useTranslation } from 'react-i18next'
 
-export default function SettingsPage() {
-  const settings = useSettingsStore();
-  const { t, i18n } = useTranslation();
-  
-  const handleHostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    settings.updateSettings({ ollamaHost: e.target.value });
-    ollamaAPI.updateHost(e.target.value);
-  };
+export default function SettingsPage(): React.ReactElement {
+  const settings = useSettingsStore()
+  const { t, i18n } = useTranslation()
 
-  const changeLanguage = (lng: string) => {
-    i18n.changeLanguage(lng);
-  };
+  const handleHostChange = (e: React.ChangeEvent<HTMLInputElement>): void => {
+    settings.updateSettings({ ollamaHost: e.target.value })
+    ollamaAPI.updateHost(e.target.value)
+  }
+
+  const changeLanguage = (lng: string): void => {
+    i18n.changeLanguage(lng)
+  }
 
   return (
     <div className="p-8 max-w-2xl mx-auto">
@@ -33,11 +34,9 @@ export default function SettingsPage() {
               className="w-full px-3 py-2 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="http://localhost:11434"
             />
-            <p className="text-xs text-muted-foreground">
-              {t('settings.hostHint')}
-            </p>
+            <p className="text-xs text-muted-foreground">{t('settings.hostHint')}</p>
           </div>
-          
+
           <div className="space-y-2 pt-4 border-t">
             <label className="text-sm font-medium">{t('settings.proxyMode')}</label>
             <div className="flex flex-col gap-2">
@@ -64,9 +63,7 @@ export default function SettingsPage() {
                 <span className="text-sm">{t('settings.proxySystem')}</span>
               </label>
             </div>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t('settings.proxyHint')}
-            </p>
+            <p className="text-xs text-muted-foreground mt-1">{t('settings.proxyHint')}</p>
           </div>
         </div>
 
@@ -77,6 +74,7 @@ export default function SettingsPage() {
             <label className="text-sm font-medium">{t('settings.theme')}</label>
             <select
               value={settings.theme}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={(e) => settings.updateSettings({ theme: e.target.value as any })}
               className="w-full px-3 py-2 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
@@ -85,11 +83,12 @@ export default function SettingsPage() {
               <option value="dark">{t('settings.themeDark')}</option>
             </select>
           </div>
-          
+
           <div className="space-y-2">
             <label className="text-sm font-medium">{t('settings.fontSize')}</label>
             <select
               value={settings.fontSize}
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               onChange={(e) => settings.updateSettings({ fontSize: e.target.value as any })}
               className="w-full px-3 py-2 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
             >
@@ -138,7 +137,11 @@ export default function SettingsPage() {
             <input
               type="number"
               value={settings.compatibilityCheckInterval}
-              onChange={(e) => settings.updateSettings({ compatibilityCheckInterval: parseInt(e.target.value) || 60 })}
+              onChange={(e) =>
+                settings.updateSettings({
+                  compatibilityCheckInterval: parseInt(e.target.value) || 60
+                })
+              }
               className="w-full px-3 py-2 bg-background border rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
               min="1"
             />
@@ -156,5 +159,5 @@ export default function SettingsPage() {
         </div>
       </div>
     </div>
-  );
+  )
 }

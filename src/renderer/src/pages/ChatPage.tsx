@@ -1,100 +1,98 @@
-import { useEffect, useRef, useState } from 'react';
-import { useChatStore } from '../store/useChatStore';
-import { useModelStore } from '../store/useModelStore';
-import { useSettingsStore } from '../store/useSettingsStore';
-import { Send, Plus, MessageSquare, Trash2, User, Bot, Copy, Check, Info } from 'lucide-react';
-import { ollamaAPI } from '../api/ollama';
-import ReactMarkdown from 'react-markdown';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import remarkGfm from 'remark-gfm';
-import { cn } from '../lib/utils';
-import { useTranslation } from 'react-i18next';
+import React, { useEffect, useRef, useState } from 'react'
+import { useChatStore } from '../store/useChatStore'
+import { useModelStore } from '../store/useModelStore'
+import { useSettingsStore } from '../store/useSettingsStore'
+import { Send, Plus, MessageSquare, Trash2, User, Bot, Copy, Check } from 'lucide-react'
+import { ollamaAPI } from '../api/ollama'
+import ReactMarkdown from 'react-markdown'
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
+import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import remarkGfm from 'remark-gfm'
+import { cn } from '../lib/utils'
+import { useTranslation } from 'react-i18next'
 
-export default function ChatPage() {
-  const { 
-    sessions, 
-    currentSessionId, 
-    createSession, 
-    deleteSession, 
-    selectSession, 
-    addMessage, 
+export default function ChatPage(): React.ReactElement {
+  const {
+    sessions,
+    currentSessionId,
+    createSession,
+    deleteSession,
+    selectSession,
+    addMessage,
     updateMessage,
-    getCurrentSession 
-  } = useChatStore();
-  const { models, fetchModels } = useModelStore();
-  const { showTimestamp } = useSettingsStore();
-  const [input, setInput] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
+    getCurrentSession
+  } = useChatStore()
+  const { models, fetchModels } = useModelStore()
+  const { showTimestamp } = useSettingsStore()
+  const [input, setInput] = useState('')
+  const [isGenerating, setIsGenerating] = useState(false)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const { t } = useTranslation()
 
-  const currentSession = getCurrentSession();
-
-  useEffect(() => {
-    fetchModels();
-  }, [fetchModels]);
+  const currentSession = getCurrentSession()
 
   useEffect(() => {
-    scrollToBottom();
-  }, [currentSession?.messages, isGenerating]);
+    fetchModels()
+  }, [fetchModels])
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  useEffect(() => {
+    scrollToBottom()
+  }, [currentSession?.messages, isGenerating])
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || !currentSession || isGenerating) return;
+  const scrollToBottom = (): void => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
 
-    const userMessageContent = input.trim();
-    setInput('');
+  const handleSendMessage = async (e: React.FormEvent): Promise<void> => {
+    e.preventDefault()
+    if (!input.trim() || !currentSession || isGenerating) return
+
+    const userMessageContent = input.trim()
+    setInput('')
 
     // Add user message
     addMessage(currentSession.id, {
       role: 'user',
       content: userMessageContent
-    });
+    })
 
-    setIsGenerating(true);
+    setIsGenerating(true)
 
     // Create assistant message placeholder
     const assistantMsgId = addMessage(currentSession.id, {
       role: 'assistant',
       content: '',
       model: currentSession.modelName
-    });
+    })
 
     try {
-      let fullResponse = '';
-      
+      let fullResponse = ''
+
       // Use streaming chat
       await ollamaAPI.streamChat(
         currentSession.modelName,
-        currentSession.messages.concat([
-          { role: 'user', content: userMessageContent, id: 'temp', timestamp: Date.now() } // temp user msg for context
-        ]).map(m => ({ role: m.role, content: m.content })),
+        currentSession.messages
+          .concat([
+            { role: 'user', content: userMessageContent, id: 'temp', timestamp: Date.now() } // temp user msg for context
+          ])
+          .map((m) => ({ role: m.role, content: m.content })),
         (chunk) => {
-          fullResponse += chunk;
-          updateMessage(currentSession.id, assistantMsgId, fullResponse);
+          fullResponse += chunk
+          updateMessage(currentSession.id, assistantMsgId, fullResponse)
         }
-      );
-    } catch (error: any) {
-      updateMessage(currentSession.id, assistantMsgId, `Error: ${error.message}`);
+      )
+    } catch (error) {
+      updateMessage(currentSession.id, assistantMsgId, `Error: ${(error as Error).message}`)
     } finally {
-      setIsGenerating(false);
+      setIsGenerating(false)
     }
-  };
+  }
 
-  const handleNewChat = () => {
+  const handleNewChat = (): void => {
     if (models.length > 0) {
-      createSession(models[0].name);
+      createSession(models[0].name)
     }
-  };
-
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-  };
+  }
 
   return (
     <div className="flex h-full">
@@ -112,17 +110,17 @@ export default function ChatPage() {
 
         <div className="flex-1 overflow-y-auto">
           {sessions.length === 0 ? (
-            <div className="p-4 text-center text-muted-foreground text-sm">
-              {t('chat.noChats')}
-            </div>
+            <div className="p-4 text-center text-muted-foreground text-sm">{t('chat.noChats')}</div>
           ) : (
             <div className="space-y-1 p-2">
               {sessions.map((session) => (
                 <div
                   key={session.id}
                   className={cn(
-                    "group flex items-center justify-between px-3 py-2 rounded-md text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors",
-                    currentSessionId === session.id ? "bg-accent text-accent-foreground" : "text-muted-foreground"
+                    'group flex items-center justify-between px-3 py-2 rounded-md text-sm cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors',
+                    currentSessionId === session.id
+                      ? 'bg-accent text-accent-foreground'
+                      : 'text-muted-foreground'
                   )}
                   onClick={() => selectSession(session.id)}
                 >
@@ -132,8 +130,8 @@ export default function ChatPage() {
                   </div>
                   <button
                     onClick={(e) => {
-                      e.stopPropagation();
-                      deleteSession(session.id);
+                      e.stopPropagation()
+                      deleteSession(session.id)
                     }}
                     className="opacity-0 group-hover:opacity-100 p-1 hover:text-destructive transition-opacity"
                   >
@@ -171,18 +169,20 @@ export default function ChatPage() {
                 <Bot className="w-5 h-5 text-primary" />
                 <span className="font-medium">{currentSession.modelName}</span>
               </div>
-              
+
               <div className="flex items-center gap-2">
-                <select 
+                <select
                   className="text-sm border rounded px-2 py-1 bg-background"
                   value={currentSession.modelName}
-                  onChange={(e) => {
+                  onChange={() => {
                     // Update model for current session logic would go here
                     // For now, we'd need to add updateSessionModel to store
                   }}
                 >
-                  {models.map(model => (
-                    <option key={model.name} value={model.name}>{model.name}</option>
+                  {models.map((model) => (
+                    <option key={model.name} value={model.name}>
+                      {model.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -194,27 +194,39 @@ export default function ChatPage() {
                 <div
                   key={msg.id}
                   className={cn(
-                    "flex gap-4 max-w-4xl mx-auto",
-                    msg.role === 'user' ? "flex-row-reverse" : "flex-row"
+                    'flex gap-4 max-w-4xl mx-auto',
+                    msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'
                   )}
                 >
-                  <div className={cn(
-                    "w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1",
-                    msg.role === 'user' ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
-                  )}>
-                    {msg.role === 'user' ? <User className="w-5 h-5" /> : <Bot className="w-5 h-5" />}
+                  <div
+                    className={cn(
+                      'w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-1',
+                      msg.role === 'user'
+                        ? 'bg-primary text-primary-foreground'
+                        : 'bg-secondary text-secondary-foreground'
+                    )}
+                  >
+                    {msg.role === 'user' ? (
+                      <User className="w-5 h-5" />
+                    ) : (
+                      <Bot className="w-5 h-5" />
+                    )}
                   </div>
 
-                  <div className={cn(
-                    "flex flex-col max-w-[80%]",
-                    msg.role === 'user' ? "items-end" : "items-start"
-                  )}>
-                    <div className={cn(
-                      "rounded-lg p-4 shadow-sm",
-                      msg.role === 'user' 
-                        ? "bg-primary text-primary-foreground" 
-                        : "bg-card border text-card-foreground"
-                    )}>
+                  <div
+                    className={cn(
+                      'flex flex-col max-w-[80%]',
+                      msg.role === 'user' ? 'items-end' : 'items-start'
+                    )}
+                  >
+                    <div
+                      className={cn(
+                        'rounded-lg p-4 shadow-sm',
+                        msg.role === 'user'
+                          ? 'bg-primary text-primary-foreground'
+                          : 'bg-card border text-card-foreground'
+                      )}
+                    >
                       {msg.role === 'user' ? (
                         <p className="whitespace-pre-wrap">{msg.content}</p>
                       ) : (
@@ -222,8 +234,9 @@ export default function ChatPage() {
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
-                              code({ node, inline, className, children, ...props }: any) {
-                                const match = /language-(\w+)/.exec(className || '');
+                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                              code({ inline, className, children, ...props }: any) {
+                                const match = /language-(\w+)/.exec(className || '')
                                 return !inline && match ? (
                                   <div className="relative group">
                                     <div className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
@@ -242,7 +255,7 @@ export default function ChatPage() {
                                   <code className={className} {...props}>
                                     {children}
                                   </code>
-                                );
+                                )
                               }
                             }}
                           >
@@ -251,7 +264,7 @@ export default function ChatPage() {
                         </div>
                       )}
                     </div>
-                    
+
                     {showTimestamp && (
                       <span className="text-xs text-muted-foreground mt-1 px-1">
                         {new Date(msg.timestamp).toLocaleTimeString()}
@@ -296,18 +309,18 @@ export default function ChatPage() {
         )}
       </div>
     </div>
-  );
+  )
 }
 
-function CopyButton({ text }: { text: string }) {
-  const [copied, setCopied] = useState(false);
-  const { t } = useTranslation();
+function CopyButton({ text }: { text: string }): React.ReactElement {
+  const [copied, setCopied] = useState(false)
+  const { t } = useTranslation()
 
-  const handleCopy = () => {
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
+  const handleCopy = (): void => {
+    navigator.clipboard.writeText(text)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <button
@@ -317,5 +330,5 @@ function CopyButton({ text }: { text: string }) {
     >
       {copied ? <Check className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
     </button>
-  );
+  )
 }

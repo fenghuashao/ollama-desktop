@@ -8,7 +8,7 @@ import { promisify } from 'util'
 const execAsync = promisify(exec)
 
 // Force disable proxy for localhost
-process.env.NO_PROXY = 'localhost,127.0.0.1,::1';
+process.env.NO_PROXY = 'localhost,127.0.0.1,::1'
 
 function createWindow(): void {
   // Create the browser window.
@@ -27,7 +27,7 @@ function createWindow(): void {
 
   // Modify CORS headers for Ollama API
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
-    const { responseHeaders } = details;
+    const { responseHeaders } = details
     if (details.url.includes('localhost:11434') || details.url.includes('127.0.0.1:11434')) {
       callback({
         responseHeaders: {
@@ -36,20 +36,20 @@ function createWindow(): void {
           'Access-Control-Allow-Headers': ['*'],
           'Access-Control-Allow-Methods': ['*']
         }
-      });
+      })
     } else {
-      callback({ responseHeaders });
+      callback({ responseHeaders })
     }
-  });
+  })
 
   // Configure proxy to bypass localhost for Ollama connection
-  const ses = session.defaultSession;
-  
+  const ses = session.defaultSession
+
   // Initial proxy setup - default to direct for localhost
   ses.setProxy({
     proxyRules: 'direct://',
     proxyBypassRules: 'localhost,127.0.0.1,::1,127.0.0.0/8'
-  });
+  })
 
   // Handle proxy mode changes from renderer
   ipcMain.handle('set-proxy-mode', async (_, mode: 'direct' | 'system') => {
@@ -57,15 +57,15 @@ function createWindow(): void {
       await ses.setProxy({
         proxyRules: 'direct://',
         proxyBypassRules: 'localhost,127.0.0.1,::1,127.0.0.0/8'
-      });
-      console.log('Proxy mode set to: direct (bypass all)');
+      })
+      console.log('Proxy mode set to: direct (bypass all)')
     } else {
       await ses.setProxy({
         mode: 'system'
-      });
-      console.log('Proxy mode set to: system');
+      })
+      console.log('Proxy mode set to: system')
     }
-  });
+  })
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()
@@ -105,13 +105,11 @@ app.whenReady().then(() => {
   // Ollama Service Management
   ipcMain.handle('ollama:check-process', async () => {
     try {
-      const command = process.platform === 'win32' 
-        ? 'tasklist | findstr ollama' 
-        : 'pgrep -x ollama'
-      
+      const command = process.platform === 'win32' ? 'tasklist | findstr ollama' : 'pgrep -x ollama'
+
       await execAsync(command)
       return true
-    } catch (error) {
+    } catch {
       return false
     }
   })
@@ -122,27 +120,25 @@ app.whenReady().then(() => {
         detached: true,
         stdio: 'ignore'
       })
-      
+
       child.unref()
-      
+
       return { success: true }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to start ollama:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: (error as Error).message }
     }
   })
 
   ipcMain.handle('ollama:stop-service', async () => {
     try {
-      const command = process.platform === 'win32'
-        ? 'taskkill /IM ollama.exe /F'
-        : 'pkill ollama'
-        
+      const command = process.platform === 'win32' ? 'taskkill /IM ollama.exe /F' : 'pkill ollama'
+
       await execAsync(command)
       return { success: true }
-    } catch (error: any) {
+    } catch (error) {
       console.error('Failed to stop ollama:', error)
-      return { success: false, error: error.message }
+      return { success: false, error: (error as Error).message }
     }
   })
 

@@ -54,7 +54,7 @@ This section guides you through submitting an enhancement suggestion for Ollama 
 
 This section lists the labels we use to help us track and manage issues and pull requests.
 
-* `bug` - Issues that are bugs.
-* `enhancement` - Issues that are feature requests.
-* `documentation` - Issues that are documentation improvements.
-* `good first issue` - Good for newcomers.
+- `bug` - Issues that are bugs.
+- `enhancement` - Issues that are feature requests.
+- `documentation` - Issues that are documentation improvements.
+- `good first issue` - Good for newcomers.
