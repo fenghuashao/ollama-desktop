@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "A powerful desktop management application for Ollama",
   "main": "./out/main/index.js",
-  "author": "fengshaohua",
+  "author": "fenghuashao",
   "license": "MIT",
-  "homepage": "https://github.com/fengshaohua/ollama-desktop",
+  "homepage": "https://github.com/fenghuashao/ollama-desktop",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fengshaohua/ollama-desktop.git"
+    "url": "https://github.com/fenghuashao/ollama-desktop.git"
   },
   "keywords": [
     "ollama",

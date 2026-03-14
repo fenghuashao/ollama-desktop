@@ -28,3 +28,4 @@ dist-electron/
 
 # OS generated files
 Thumbs.db
+error/github-error.txt
